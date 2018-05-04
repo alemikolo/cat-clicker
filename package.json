@@ -1,0 +1,23 @@
+{
+  "name": "cat-clicker",
+  "version": "1.0.0",
+  "description": "fend-application",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alemikolo/cat-clicker.git"
+  },
+  "author": "Aleksander Fret",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alemikolo/cat-clicker/issues"
+  },
+  "homepage": "https://github.com/alemikolo/cat-clicker#readme",
+  "browserslist": [
+    "since 2015",
+    "IE > 8"
+  ]
+}
