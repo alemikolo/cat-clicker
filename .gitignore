@@ -5,3 +5,5 @@
 !/app/css
 /app/css/*
 /.vscode
+!/lib
+/lib/*

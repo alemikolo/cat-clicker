@@ -7,15 +7,16 @@ const babel = require('gulp-babel');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify-es').default;
 const rename = require('gulp-rename');
-const concat = require('gulp-concat');npm
+const concat = require('gulp-concat');
 const del = require('del');
 const htmlreplace = require('gulp-html-replace');
 
+// develope tasks
 gulp.task('default', function(done){
   gulp.watch('./src/js/**/*.js', gulp.series('js'));
   gulp.watch('./src/sass/**/*.scss', gulp.series('styles'));
   gulp.watch('./src/index.html', gulp.series('html'));
-  gulp.watch('./src/index.html', gulp.series('html'));
+  gulp.watch('./src/img/**/*.+(jpg|png|svg)', gulp.series('img'));
   browserSync.init({
     server: "./dist"
   });
@@ -51,12 +52,14 @@ gulp.task('js', (done) => {
     done();
   });
 
-  gulp.task('img', function(done) {
-    gulp.src('./src/img/*.+(jpg|png|svg)')
+  gulp.task('img', (done) => {
+    gulp.src('./src/img/**/*.+(jpg|png|svg)')
       .pipe(gulp.dest('./dist/img'))
       .pipe(browserSync.stream());
     done();
   });
+
+  // testing tasks
 
   // distribution tasks
   gulp.task('js-dist', (done) => {
@@ -82,7 +85,7 @@ gulp.task('js', (done) => {
   });
 
   gulp.task('html-dist', (done) => {
-    gulp.src('./app/index.html')
+    gulp.src('./src/index.html')
       .pipe(htmlreplace({
         'js': 'js/main.min.js'
       }))
@@ -90,13 +93,13 @@ gulp.task('js', (done) => {
     done();
   });
 
-  gulp.task('img-dist', function(done) {
-    gulp.src('./src/img/*.+(jpg|png|svg)')
+  gulp.task('img-dist', (done) => {
+    gulp.src('./src/img/**/*.+(jpg|png|svg)')
       // .pipe(imagemin({
       //   progressive: true,
       //   use: [pngquant()]
       // }))
-      .pipe(gulp.dest('dist/img'));
+      .pipe(gulp.dest('./dist/img'));
     done();
   });
 
@@ -106,6 +109,5 @@ gulp.task('js', (done) => {
   });
 
   gulp.task('dist', gulp.series('empty-dist', 'js-dist', 'styles-dist', 'html-dist', 'img-dist', (done) => {
-    browserSync.stream();
     done();
   }));

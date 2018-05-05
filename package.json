@@ -4,7 +4,7 @@
   "description": "fend-application",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "jasmine"
   },
   "repository": {
     "type": "git",
@@ -37,5 +37,6 @@
     "gulp-sass": "^4.0.1",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify-es": "^1.0.1"
-  }
+  },
+  "dependencies": {}
 }
