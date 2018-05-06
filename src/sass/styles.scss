@@ -1,1 +1,39 @@
+@import "helpers/reset";
 @import "partials/variables";
+
+body {
+  font: normal normal 300 $text-size $text-font;
+}
+
+.cat-clicker {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.cat {
+  display: block;
+  box-sizing: border-box;
+  width: 90%;
+  margin: 5%;
+  padding: 5%;
+  box-shadow: 3px 3px 7px 0 rgba(0, 0, 0, 0.3);
+}
+
+.cat-img {
+  display: block;
+  width: 100%;
+}
+
+.cat-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 5% 0 0 0;
+}
+
+.cat-name {
+  font-weight: 700;
+}

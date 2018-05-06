@@ -108,6 +108,10 @@ gulp.task('js', (done) => {
     done();
   });
 
+  gulp.task('refresh', gulp.series('empty-dist', 'js', 'styles', 'img', 'html', (done) => {
+    done();
+  }));
+
   gulp.task('dist', gulp.series('empty-dist', 'js-dist', 'styles-dist', 'html-dist', 'img-dist', (done) => {
     done();
   }));
