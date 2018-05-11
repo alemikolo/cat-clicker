@@ -1,35 +1,118 @@
-const CatClicker = (() => {
+const CatClickerModel = (() => {
   const priv = new WeakMap();
 
   const _ = instance => priv.get(instance);
 
-  const createCatLink = (cat, index) => {
-    const newItem = document.createElement('li');
-    const newLink = document.createElement('button');
-    newLink.classList.add('cat-button');
-    newLink.setAttribute('type', 'button');
-    newLink.setAttribute('data-index', index);
-    newLink.textContent = cat.name;
+  const increaseClickNumber = (instance, index) => {
+    _(instance).cats[index].clickNumber++;
+  };
 
-    newItem.appendChild(newLink);
+  class Model {
+    constructor() {
+      const privateProps = {
+        cats: [
+          { name: 'archibald', clickNumber: 0 },
+          { name: 'banjo', clickNumber: 0 },
+          { name: 'benjamin', clickNumber: 0 },
+          { name: 'bingo', clickNumber: 0 },
+          { name: 'chewie', clickNumber: 0 },
+          { name: 'duke', clickNumber: 0 },
+          { name: 'fabio', clickNumber: 0 },
+          { name: 'flash', clickNumber: 0 },
+          { name: 'homer', clickNumber: 0 },
+          { name: 'simba', clickNumber: 0 },
+          { name: 'swift', clickNumber: 0 },
+          { name: 'tiberius', clickNumber: 0 },
+        ],
+        currentCat: null,
+      };
+
+      priv.set(this, privateProps);
+    }
+
+    get cats() {
+      return _(this).cats;
+    }
+
+    get currentCat() {
+      return _(this).currentCat;
+    }
+
+    getCurrentCat() {
+      const index = this.currentCat;
+      return { ..._(this).cats[index], index };
+    }
+
+    setCurrentCat(index) {
+      _(this).currentCat = index;
+    }
+
+    updateCat(index) {
+      increaseClickNumber(this, index);
+    }
+  }
+  return Model;
+})();
+
+const CatClickerListView = (() => {
+  const priv = new WeakMap();
+
+  const _ = instance => priv.get(instance);
+
+  const createCatButton = (cat, index) => {
+    const newItem = document.createElement('li');
+    const newButton = document.createElement('button');
+    newButton.classList.add('cat-button');
+    newButton.setAttribute('type', 'button');
+    newButton.setAttribute('data-index', index);
+    newButton.textContent = cat.name;
+
+    newItem.appendChild(newButton);
 
     return newItem;
   };
 
-  const prepareCatsList = (instance) => {
-    const { cats, catsContainer } = _(instance);
-    const list = catsContainer.querySelector('.cat-list');
+  const createCatList = (cats) => {
     const catsDOMElements = document.createDocumentFragment();
     cats.forEach((cat, index) => {
-      const newCat = createCatLink(cat, index);
+      const newCat = createCatButton(cat, index);
       catsDOMElements.appendChild(newCat);
     });
-    list.appendChild(catsDOMElements);
+
+    return catsDOMElements;
   };
 
-  const prepareCatImgBox = (instance) => {
-    const { catsContainer } = _(instance);
+  class ListView {
+    constructor() {
+      const privateProps = { catList: document.querySelector('.cat-list') };
+      priv.set(this, privateProps);
 
+      this.catList.addEventListener('click', (event) => {
+        if (event.target.nodeName === 'BUTTON') {
+          controller.currentCatHandler(event.target.dataset.index);
+        }
+      });
+    }
+
+    get catList() {
+      return _(this).catList;
+    }
+
+    render() {
+      const cats = controller.getCats();
+      this.catList.appendChild(createCatList(cats));
+    }
+  }
+
+  return ListView;
+})();
+
+const CatClickerCatView = (() => {
+  const priv = new WeakMap();
+
+  const _ = instance => priv.get(instance);
+
+  const prepareCatImgBox = (catsContainer) => {
     const catImgBox = document.createElement('div');
     catImgBox.classList.add('cat-box');
     const newCat = document.createElement('figure');
@@ -56,122 +139,97 @@ const CatClicker = (() => {
     catsContainer.appendChild(catImgBox);
   };
 
-  const prepareCatsProp = (cats) => {
-    const newCats = cats.map(cat => ({
-      name: cat,
-      url: `img//images//${cat}.jpg`,
-      clickNumber: 0,
-    }));
-    return newCats;
-  };
-
-  const setCatTagProp = (instance) => {
-    const { catsContainer } = _(instance);
-    _(instance).catImgTag = catsContainer.querySelector('.cat-img');
-    _(instance).catNameTag = catsContainer.querySelector('.cat-name');
-    _(instance).catClickTag = catsContainer.querySelector('.cat-clicks');
-  };
-
-  const updateCatInfo = (instance, name, clickNumber) => {
-    _(instance).catNameTag.textContent = name;
-    _(instance).catClickTag.textContent = `Clicks: ${clickNumber}`;
-  };
-
-  const increaseClickNumber = (instance, index) => {
-    if (index >= 0 && index < _(instance).cats.length) {
-      _(instance).cats[index].clickNumber++;
-    }
-  };
-
-  const clickCountHandler = (instance, index) => {
-    const cat = _(instance).cats[index];
-    increaseClickNumber(instance, index);
-    updateCatInfo(instance, cat.name, cat.clickNumber);
-  };
-
-  const loadCat = (instance, index) => {
-    const { catImgTag } = _(instance);
-    const cat = _(instance).cats[index];
-    catImgTag.setAttribute('src', `img//images//${cat.name}.jpg`);
-    catImgTag.setAttribute('data-index', index);
-    updateCatInfo(instance, cat.name, cat.clickNumber);
-  };
-
-  const setActiveButton = (element) => {
-    const previous = document.querySelector('.active-cat');
-    if (previous) {
-      previous.classList.remove('active-cat');
-    }
-    element.classList.add('active-cat');
-  };
-
-  class CatClickerClass {
-    constructor(cats, catsContainer) {
+  class CatView {
+    constructor() {
+      const catsContainer = document.querySelector('.cat-clicker');
+      prepareCatImgBox(catsContainer);
       const privateProps = {
-        cats: prepareCatsProp(cats),
-        catsContainer,
-        catImgTag: null,
-        catNameTag: null,
-        catClickTag: null,
+        catTags: {
+          img: document.querySelector('.cat-img'),
+          name: document.querySelector('.cat-name'),
+          click: document.querySelector('.cat-clicks'),
+        },
       };
-
       priv.set(this, privateProps);
-
-      prepareCatsList(this);
-      prepareCatImgBox(this);
-      setCatTagProp(this);
-      loadCat(this, 0);
-      setActiveButton(document.querySelector('button[data-index="0"]'));
-
-      this.catsContainer.addEventListener('click', (event) => {
-        const { target } = event;
-        if (target.nodeName === 'IMG') {
-          const catIndex = target.dataset.index;
-          clickCountHandler(this, catIndex);
-        } else if (target.nodeName === 'BUTTON') {
-          const catIndex = target.dataset.index;
-          loadCat(this, catIndex);
-          setActiveButton(target);
+      catsContainer.addEventListener('click', (event) => {
+        if (event.target.nodeName === 'IMG') {
+          controller.clickCountHandler(event.target.dataset.index);
         }
       });
     }
 
-    get cats() {
-      return _(this).cats;
+    render() {
+      const cat = controller.getCurrentCat();
+      if (cat.index !== this.catTags.img.getAttribute('data-index')) {
+        this.catTags.img.setAttribute('src', `img//images//${cat.name}.jpg`);
+        this.catTags.img.setAttribute('data-index', cat.index);
+        this.catTags.name.textContent = cat.name;
+      }
+      this.catTags.click.textContent = `Clicks: ${cat.clickNumber}`;
     }
-    get catsContainer() {
-      return _(this).catsContainer;
-    }
-    get catImgTag() {
-      return _(this).catImgTag;
-    }
-    get catNameTag() {
-      return _(this).catNameTag;
-    }
-    get catClickTag() {
-      return _(this).catClickTag;
+
+    get catTags() {
+      return _(this).catTags;
     }
   }
-
-  return CatClickerClass;
+  return CatView;
 })();
 
-const cats = [
-  'archibald',
-  'banjo',
-  'benjamin',
-  'bingo',
-  'chewie',
-  'duke',
-  'fabio',
-  'flash',
-  'homer',
-  'simba',
-  'swift',
-  'tiberius',
-];
+const CatClickerController = (() => {
+  const priv = new WeakMap();
 
-const catClicker = new CatClicker( // eslint-disable-line no-unused-vars
-  cats,
-  document.querySelector('#cat-clicker'),
-);
+  const _ = instance => priv.get(instance);
+
+  class Controller {
+    constructor() {
+      const privateProps = {
+        model: new CatClickerModel(),
+        listView: new CatClickerListView(),
+        catView: new CatClickerCatView(),
+      };
+
+      priv.set(this, privateProps);
+
+      this.model.setCurrentCat(0);
+    }
+
+    get model() {
+      return _(this).model;
+    }
+
+    get listView() {
+      return _(this).listView;
+    }
+
+    get catView() {
+      return _(this).catView;
+    }
+
+    getCats() {
+      return this.model.cats;
+    }
+
+    getCurrentCat() {
+      return this.model.getCurrentCat();
+    }
+
+    currentCatHandler(index) {
+      this.model.setCurrentCat(index);
+      this.catView.render();
+    }
+
+    clickCountHandler(index) {
+      this.model.updateCat(index);
+      this.catView.render();
+    }
+
+    init() {
+      this.listView.render();
+      this.catView.render();
+    }
+  }
+  return Controller;
+})();
+
+const controller = new CatClickerController();
+controller.init();
